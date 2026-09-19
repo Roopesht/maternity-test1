@@ -1,0 +1,894 @@
+<!DOCTYPE html><html lang="en"><head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maternal Care Platform - Architecture Blueprint</title>
+    
+    
+</head>
+<body>
+    <button>🌙 Dark Mode</button>
+
+    <div>
+        <!-- SIDEBAR -->
+        <nav>
+            <div>
+                <div>🤰</div>
+                <div>
+                    <div>Maternal Care Platform</div>
+                    <div>Architecture Blueprint</div>
+                </div>
+            </div>
+
+            <div>
+                <div>Overview</div>
+                <a href="#overview">📋 System Overview</a>
+                <a href="#architecture">🏗️ Architecture Diagram</a>
+            </div>
+            <div>
+                <div>Core Services</div>
+                <a href="#services">🧩 Microservices Catalog</a>
+                <a href="#roles">👥 Roles, Permissions &amp; Authorisation</a>
+            </div>
+            <div>
+                <div>Onboarding</div>
+                <a href="#onboarding">🏥 Hospital Onboarding &amp; Departments</a>
+                <a href="#paas-saas">🔀 PaaS → SaaS Journey</a>
+            </div>
+            <div>
+                <div>Clinical Flow</div>
+                <a href="#edd">📅 Antenatal, Document Upload &amp; EDD</a>
+                <a href="#gate">🚦 Gate Flow</a>
+                <a href="#archive">🗃️ Archive Architecture</a>
+            </div>
+            <div>
+                <div>Billing</div>
+                <a href="#summing">🧮 Summing Engine &amp; Charges</a>
+                <a href="#subscription">🪙 Subscription &amp; Billing Models</a>
+            </div>
+            <div>
+                <div>Collaboration</div>
+                <a href="#chat">💬 Chat &amp; Notifications</a>
+                <a href="#reconciliation">🔍 Reconciliation &amp; Overrides</a>
+                <a href="#complaints">📢 Complaints &amp; Monitoring</a>
+            </div>
+            <div>
+                <div>Platform</div>
+                <a href="#multitenancy">🏢 Multi-Tenancy &amp; Feature Flags</a>
+                <a href="#traversal">🌐 Cross-Tenant Patient Traversal</a>
+                <a href="#infra">☁️ Technical Infrastructure</a>
+            </div>
+            <div>
+                <div>Reference</div>
+                <a href="#stack">🛠️ Technology Stack</a>
+                <a href="#vision">🔮 Vision &amp; Roadmap</a>
+                <a href="#open">❓ Open Decisions</a>
+            </div>
+        </nav>
+
+        <!-- MAIN CONTENT -->
+        <main>
+            <header>
+                <div>Architecture Blueprint · Draft v0.2 · Sep 2026</div>
+                <h1>🤰 Maternal Care Platform</h1>
+                <p>Multi-Tenant PaaS/SaaS for Hospital Antenatal, Labour Room &amp; Delivery Management</p>
+                <p>Tagline: Customisation · Antenatal · LR · Summing Engine · Billing · In-App Chat · Delivery Archive</p>
+            </header>
+
+          
+
+            <!-- SECTION 1: SYSTEM OVERVIEW -->
+            <section>
+                <div>
+                    <h3>📋 System Overview</h3>
+                    <div>▼</div>
+                </div>
+                <div>
+                    <p>A multi-tenant platform that lets hospitals manage the full maternity journey — antenatal registration, document uploads, labour room (LR) workflow, delivery/admission, billing, and patient archival — under a single, standardised paid-tier product with minimal manual hand-holding. Each hospital (tenant) configures its own departments, packages, and rate lists; a platform-level Super Admin governs onboarding, cross-tenant audit, complaint escalation, platform monitoring, and usage billing.</p>
+
+                    <div>
+                        <div>
+                            <h4>🤰 Antenatal-to-Discharge Journey</h4>
+                            <p>Covers registration, document uploading, EDD arbitration, labour room gating, delivery/admission, and discharge receipt as the final document.</p>
+                        </div>
+                        <div>
+                            <h4>🧮 Summing Engine</h4>
+                            <p>Central charge aggregator across 4 delivery categories and 2 rate lists, with package caps and override handling.</p>
+                        </div>
+                        <div>
+                            <h4>🏢 Multi-Tenant Configuration</h4>
+                            <p>Hospital Admin owns all configuration — departments, staff, rate lists, branding. Identical whether the tenant is on PaaS or SaaS.</p>
+                        </div>
+                        <div>
+                            <h4>🗃️ Delivery Archive</h4>
+                            <p>Natural vs. Forced archive paths with strict ACTIVE ↔ ARCHIVED status transitions and a defined protocol.</p>
+                        </div>
+                        <div>
+                            <h4>💬 In-App Chat</h4>
+                            <p>Scoped strictly to Patient ↔ RMO/Lady Doctor ↔ Hospital Admin, and only while the patient is ACTIVE. Includes an unresolved "N-Chaining" concept <span>open</span>.</p>
+                        </div>
+                        <div>
+                            <h4>🪙 Tenant-Chosen Subscription <span>NEW</span></h4>
+                            <p>Every tenant picks one billing model: Coin-based (50 coins/registration), Double Delivery Figure, or Fixed Subscription slabs.</p>
+                        </div>
+                        <div>
+                            <h4>🔀 PaaS → SaaS Journey</h4>
+                            <p>Trademark, branding, own app, own store listing, self-hosting — now framed explicitly as a tracked tenant "journey" with a PaaS/SaaS identification flag.</p>
+                        </div>
+                        <div>
+                            <h4>🌐 Cross-Tenant Patient Traversal <span>NEW</span></h4>
+                            <p>Patients (never tenants) can be looked up/traverse across hospitals — feeds a "global" tier of the Search Service.</p>
+                        </div>
+                    </div>
+
+                    <div>
+                        <strong>Key Stakeholders &amp; Users:</strong>
+                        <ul>
+                            <li><strong>Super Admin</strong> — Platform-level; ratifies hospital onboarding, runs cross-hospital override audits, tracks usage/API-cost billing, oversees the PaaS→SaaS journey, receives escalated complaints, and owns the platform monitoring/outage dashboard</li>
+                            <li><strong>Hospital Admin</strong> — Owns all tenant configuration: departments, packages, rate lists, staff, branding (incl. SaaS-side branding); can merge/demerge staff roles; handles manual overrides and complaint intake/forwarding; issues mistake highlights/reprimands</li>
+                            <li><strong>Registration Staff (USG Staff / Lady Doctor)</strong> — The only roles permitted to register a patient, upload documents, and set EDD</li>
+                            <li><strong>Lab Staff</strong> <span>NEW</span> — Can add charges and upload documents, but cannot register a patient or set EDD</li>
+                            <li><strong>LR Staff</strong> — Unlocks Gate 1, flags LSCS/NICU, overrides delivery charges (if present in rate list)</li>
+                            <li><strong>Billing Reception</strong> — Adds/overrides charges once the patient is past Gate 1</li>
+                            <li><strong>RMO, Incident Manager</strong> — Clinical support and always-on escalation</li>
+                            <li><strong>Patient</strong> — Self-service search, chat access while ACTIVE only, complaints auto-routed to Super Admin/Hospital Admin</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 2: ARCHITECTURE DIAGRAM -->
+            <section>
+                <div>
+                    <h3>🏗️ High-Level Architecture Diagram</h3>
+                    <div>▼</div>
+                </div>
+                <div>
+                    <div>
+graph TB
+    CLIENT["Client Apps\n(Hospital Staff / Patient)"]
+    ALB["AWS ALB"]
+    GW["API Gateway"]
+
+    subgraph SERVICES["Core Microservices"]
+        IDN["Identity Service\n(IAM · AuthN · AuthZ)"]
+        AUTH["Authorisation Service\n(RBAC / Permission Matrix)"]
+        TEN["Tenant Provisioning"]
+        PREG["Patient Registry Service"]
+        GATE["Gate Service"]
+        ANC["Antenatal Service"]
+        EDDS["EDD Service"]
+        SUM["Summing Engine"]
+        SUB["Subscription Service"]
+        OVR["Manual Override Service"]
+        DEL["Delivery &amp; Admission Service"]
+        DOC["Document Service"]
+        NOT["Notification Service"]
+        CHT["Chat Service"]
+        SRCH["Search Service"]
+        INC["Incident Manager Service"]
+    end
+
+    subgraph DATA["Data &amp; Infrastructure"]
+        PG["PostgreSQL\n(per tenant)"]
+        OBS["Observability"]
+        S3["AWS S3\n(Documents)"]
+        SNS["AWS SNS\n(On-call Alerts)"]
+    end
+
+    CLIENT --&gt; ALB --&gt; GW
+    GW --&gt; IDN
+    GW --&gt; AUTH
+    GW --&gt; TEN
+    GW --&gt; PREG
+    GW --&gt; GATE
+    GW --&gt; ANC
+    GW --&gt; EDDS
+    GW --&gt; SUM
+    GW --&gt; SUB
+    GW --&gt; OVR
+    GW --&gt; DEL
+    GW --&gt; DOC
+    GW --&gt; NOT
+    GW --&gt; CHT
+    GW --&gt; SRCH
+    GW --&gt; INC
+    IDN --&gt; PG
+    AUTH --&gt; PG
+    TEN --&gt; PG
+    PREG --&gt; PG
+    GATE --&gt; PG
+    ANC --&gt; PG
+    EDDS --&gt; PG
+    SUM --&gt; PG
+    SUB --&gt; PG
+    OVR --&gt; PG
+    DEL --&gt; PG
+    DOC --&gt; S3
+    NOT --&gt; SNS
+    GW --&gt; OBS
+                    </div>
+                    <details>
+                        <summary>View diagram source (Mermaid)</summary>
+                        <pre><code>graph TB
+    CLIENT["Client Apps (Hospital Staff / Patient)"]
+    ALB["AWS ALB"]
+    GW["API Gateway"]
+    subgraph SERVICES["Core Microservices"]
+        IDN["Identity Service (IAM / AuthN / AuthZ)"]
+        AUTH["Authorisation Service (RBAC)"]
+        TEN["Tenant Provisioning"]
+        PREG["Patient Registry Service"]
+        GATE["Gate Service"]
+        ANC["Antenatal Service"]
+        EDDS["EDD Service"]
+        SUM["Summing Engine"]
+        SUB["Subscription Service"]
+        OVR["Manual Override Service"]
+        DEL["Delivery &amp; Admission Service"]
+        DOC["Document Service"]
+        NOT["Notification Service"]
+        CHT["Chat Service"]
+        SRCH["Search Service"]
+        INC["Incident Manager Service"]
+    end
+    subgraph DATA["Data &amp; Infrastructure"]
+        PG["PostgreSQL (per tenant)"]
+        OBS["Observability"]
+        S3["AWS S3 (Documents)"]
+        SNS["AWS SNS (On-call Alerts)"]
+    end
+    CLIENT --&gt; ALB --&gt; GW --&gt; IDN &amp; AUTH &amp; TEN &amp; PREG &amp; GATE &amp; ANC &amp; EDDS &amp; SUM &amp; SUB &amp; OVR &amp; DEL &amp; DOC &amp; NOT &amp; CHT &amp; SRCH &amp; INC
+    IDN &amp; AUTH &amp; TEN &amp; PREG &amp; GATE &amp; ANC &amp; EDDS &amp; SUM &amp; SUB &amp; OVR &amp; DEL --&gt; PG
+    DOC --&gt; S3
+    NOT --&gt; SNS
+    GW --&gt; OBS</code></pre>
+                    </details>
+                    <p>↑ Client → ALB → API Gateway → microservices → Postgres/Storage/Observability. No CDN layer at this stage — the ALB is used directly instead. <strong>EDD Service</strong> and <strong>Authorisation Service</strong> are new in v0.2 (split out of the Antenatal Service and the permissions layer respectively). Various additional networks/flows exist but are grouped together under business rules rather than separate infrastructure. Diagram font size and container width were increased in v0.2 for readability, per source note "make diagram amenable to reading."</p>
+                </div>
+            </section>
+
+            <!-- SECTION 3: MICROSERVICES CATALOG -->
+            <section>
+                <div>
+                    <h3>🧩 Microservices Catalog</h3>
+                    <div>▼</div>
+                </div>
+                <div>
+                    <p>Numbering is serial, not relational — services are simply listed in order, not mapped to each other (unlike lettered sub-items such as 1a/1b, which <em>are</em> related to their parent). Two services are new in v0.2: <strong>EDD Service</strong> (split from Antenatal Service) and <strong>Authorisation Service</strong> (the platform's RBAC/permission layer, previously folded into Identity Service).</p>
+                    <table>
+                        <thead><tr><th>#</th><th>Service</th><th>Responsibility</th><th>Key Notes</th></tr></thead>
+                        <tbody>
+                            <tr><td>1</td><td><strong>Identity Service</strong></td><td>IAM, Authentication, Authorisation</td><td>3-level user model: (1) tenant self-creates via onboarding, (2) Hospital Admin creates USG staff/Lady Doctor/etc., (3) Registration Staff can also create users. Identity Service itself still does <strong>not</strong> create users.</td></tr>
+                            <tr><td>2</td><td><strong>Authorisation Service</strong> <span>NEW</span></td><td>Central RBAC / permission matrix enforcement across all services</td><td>Full per-role Scope &amp; Key Permissions detailed in <a href="#roles">Roles, Permissions &amp; Authorisation</a></td></tr>
+                            <tr><td>3</td><td><strong>Tenant Provisioning</strong></td><td>Hospital onboarding &amp; tenant setup</td><td>Government-certificate verification → temporary approval → Super Admin ratification</td></tr>
+                            <tr><td>4</td><td><strong>Patient Registry Service</strong></td><td>Same-tenant patient records for the hospital; cross-tenant records for patients only</td><td>Central demographic &amp; registration data; registration restricted to USG dept / Lady Doctor; backs <a href="#traversal">Cross-Tenant Patient Traversal</a></td></tr>
+                            <tr><td>5</td><td><strong>Gate Service</strong></td><td>Gate state machine (Gate 1/2/3)</td><td>Determines Natural vs. Forced archive eligibility</td></tr>
+                            <tr><td>6</td><td><strong>Antenatal Service</strong></td><td>ANC registration, document intake</td><td>Registration restricted to USG dept / Lady Doctor (jointly, "Registration Staff")</td></tr>
+                            <tr><td>7</td><td><strong>EDD Service</strong> <span>NEW</span></td><td>EDD calculation</td><td>EDD can only come from a USG report (this hospital or an uploaded outside report); calculated from the <em>first</em> report showing fetal heartbeat/cardiac activity — see <a href="#edd">Antenatal, Document Upload &amp; EDD</a></td></tr>
+                            <tr><td>8</td><td><strong>Summing Engine</strong></td><td>Charge aggregation across Delivery/LSCS/NICU rate lists, package caps</td><td>4 delivery categories, 2 rate lists</td></tr>
+                            <tr><td>9</td><td><strong>Subscription Service</strong></td><td>Coin/credit ledger, Original Delivery Averages, Fixed Subscription slabs</td><td>Tenant picks one of 3 billing models — see <a href="#subscription">Subscription &amp; Billing Models</a></td></tr>
+                            <tr><td>10</td><td><strong>Manual Override Service</strong></td><td>Overrides with mandatory audit trail, across all rate lists/charges</td><td>Never opens before delivery; explanation reflected in all counters except USG and adders/enterers</td></tr>
+                            <tr><td>11</td><td><strong>Delivery &amp; Admission Service</strong></td><td>Delivery confirmation, LSCS/NICU flags</td><td>Triggers charge configuration on confirmation</td></tr>
+                            <tr><td>12</td><td><strong>Document Service</strong></td><td>Discharge receipts, generated documents, uploaded reports</td><td>Discharge receipt is the final document; once issued, all other documents on the case also become final; files stored in AWS S3</td></tr>
+                            <tr><td>13</td><td><strong>Notification Service</strong></td><td>SMS reports, alerts</td><td>Broadened definition: <em>anything</em> done by anybody or by the system itself becomes an alert (incident/system, subscription, branding, complaint, override, coin-entry alerts, etc.); weekly/monthly SMS to Hospital Admin; on-call via AWS SNS</td></tr>
+                            <tr><td>14</td><td><strong>Chat Service</strong></td><td>In-app messaging</td><td>Patient ↔ RMO/Lady Doctor ↔ Hospital Admin only; disabled after LR notifies "Delivery done" or on forced archive (not only on generic archive)</td></tr>
+                            <tr><td>15</td><td><strong>Search Service</strong></td><td>Multi-parameter search, global and local</td><td>Any parameter (name, EDD, Gate, Amount, etc.); <strong>local</strong> = tenant-scoped as before; <strong>global</strong> = new cross-tenant tier for patient lookups (see <a href="#traversal">Cross-Tenant Patient Traversal</a>)</td></tr>
+                            <tr><td>16</td><td><strong>Incident Manager Service</strong></td><td>Escalation &amp; incident tracking</td><td>Always active regardless of patient/archive state</td></tr>
+                        </tbody>
+                    </table>
+
+                    <div>
+                        <strong>Search Service scope:</strong> local search works across any parameter — EDD, Gate, Amount, or any other field — constrained "within your hospital" (tenant-scoped), as before. Global search is new in v0.2 and is scoped to patients only, to support cross-tenant continuity of care.
+                        <span>Who may run global search is not yet specified — see Open Decisions</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 4: ROLES & PERMISSIONS -->
+            <section>
+                <div>
+                    <h3>👥 Roles, Permissions &amp; Authorisation Service</h3>
+                    <div>▼</div>
+                </div>
+                <div>
+                    <p>The source notes ("61. Changes i") introduce a standalone <strong>Authorisation Service</strong> heading that restates this same role/permission matrix in Scope + Key Permissions form. It is treated here as one section rather than duplicated — the table below <em>is</em> the Authorisation Service's permission matrix.</p>
+                    <div>
+graph TB
+    SA["Super Admin"] --&gt; HA["Hospital Admin"]
+    HA --&gt; REGS["Registration Staff\n(USG Staff / Lady Doctor)"]
+    HA --&gt; LAB["Lab Staff"]
+    HA --&gt; ENTRY["Entry / Registration Staff"]
+    HA --&gt; LR["LR Staff"]
+    HA --&gt; BILL["Billing Reception"]
+    HA --&gt; RMO["RMO"]
+    HA --&gt; IM["Incident Manager"]
+    HA --&gt; PAT["Patient"]
+                    </div>
+                    <details>
+                        <summary>View diagram source (Mermaid)</summary>
+                        <pre><code>graph TB
+    SA["Super Admin"] --&gt; HA["Hospital Admin"]
+    HA --&gt; REGS["Registration Staff (USG Staff / Lady Doctor)"]
+    HA --&gt; LAB["Lab Staff"]
+    HA --&gt; ENTRY["Entry / Registration Staff"]
+    HA --&gt; LR["LR Staff"]
+    HA --&gt; BILL["Billing Reception"]
+    HA --&gt; RMO["RMO"]
+    HA --&gt; IM["Incident Manager"]
+    HA --&gt; PAT["Patient"]</code></pre>
+                    </details>
+
+                    <table>
+                        <thead><tr><th>Role</th><th>Scope</th><th>Key Permissions</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Super Admin</strong></td><td>Platform-wide</td><td>Ratify/stop hospital onboarding; override audit reports across all hospitals; usage breakdown (API calls weighted by operation cost) per hospital; <strong>oversees the PaaS→SaaS journey</strong>; <strong>receives complaints</strong> escalated about Hospital Admins, cross-journey patient complaints, and other intersection complaints for authorities; owns the <strong>monitoring dashboard</strong> for outages/lockouts — first to know if the site or any functionality stops working</td></tr>
+                            <tr><td><strong>Hospital Admin</strong></td><td>Single tenant</td><td>Owns all configuration (departments, packages, rate lists, staff, branding); provides the rate list; owns <strong>branding to the SaaS-journey receiver end</strong>; performs <strong>manual override</strong>; can <strong>merge/demerge roles</strong> for staff; can <strong>lodge and forward complaints</strong>; issues <strong>mistake highlights/reprimands</strong> (role-restricted)</td></tr>
+                            <tr><td><strong>Registration Staff — USG Staff / Lady Doctor</strong></td><td>Registration &amp; EDD</td><td>Registers patient, sets EDD (USG rate list) — <strong>both roles now grouped as equally permitted registrants</strong>; can <strong>add charges</strong>; <strong>uploads documents</strong>; escalates complaints to Hospital Admin. EDD calculation itself remains USG-report-only (see <a href="#edd">EDD Service</a>)</td></tr>
+                            <tr><td><strong>Lab Staff</strong> <span>NEW</span></td><td>Add charges</td><td>Can add charges and upload documents; <strong>cannot</strong> register a patient or set EDD; complaints to Hospital Admin</td></tr>
+                            <tr><td><strong>Entry / Registration Staff</strong></td><td>Registration</td><td>General patient entry once a department other than USG has registered the patient</td></tr>
+                            <tr><td><strong>LR Staff</strong></td><td>Labour Room</td><td>Only two jobs: (1) unlock Gate 1, (2) flag whether LSCS/NICU was required or delivery was simple; can override delivery charges only if present in the rate list; complaints to Hospital Admin</td></tr>
+                            <tr><td><strong>Billing Reception</strong></td><td>Billing</td><td>Adds charges; can override charges after Gate 1 (same override rights as LR Staff from that point); no in-app chat access; complaints to Hospital Admin</td></tr>
+                            <tr><td><strong>RMO</strong></td><td>Chat only</td><td>In-app chat participant; complaints to Hospital Admin</td></tr>
+                            <tr><td><strong>Incident Manager</strong></td><td>Cross-cutting</td><td>Always present regardless of case state</td></tr>
+                            <tr><td><strong>Patient</strong></td><td>Self</td><td>Search own record; in-app chat only while status is ACTIVE (no chat once archived); <strong>complaints auto-directed to Super Admin/Hospital Admin</strong></td></tr>
+                        </tbody>
+                    </table>
+
+                    <div>
+                        <strong>✅ Resolved — Lady Doctor registration:</strong> "61. Changes i" now explicitly groups USG Staff and Lady Doctor together under one "Registration Staff" umbrella with equal registration rights. This resolves the v0.1 contradiction over whether Lady Doctor could register a patient — she can, on par with USG Staff. EDD calculation stays USG-report-only regardless of who performed the registration (see <a href="#edd">EDD Service</a>).
+                    </div>
+
+                    <div>
+                        <strong>✅ Resolved — Multiple Lady Doctors on one case:</strong> "Combination of users" is now given one concrete rule: if more than one Lady Doctor is assigned to a case, RMO's work/chat duties are carried by the Lady Doctor(s) instead. The broader idea of automatically combining/inferring role bundles is explicitly flagged in the source as speculative and deferred — see <a href="#vision">Vision &amp; Roadmap</a>.
+                    </div>
+
+                    <div>
+                        <strong>Note on chat restriction:</strong> ANC/USG/Lab staff and Billing Reception are excluded from in-app chat; only Patient, RMO/Lady Doctor, and Hospital Admin participate.
+                    </div>
+
+                    <div>
+                        <strong>Two perspectives on role flow (from source notes):</strong> the notes frame roles as two separate chains rather than one flat list.
+                        <ul>
+                            <li><strong>Hospital-side chain</strong> — starts at Hospital Registration: Super Admin → Hospital Admin → all other hospital users.</li>
+                            <li><strong>Patient-side chain</strong> — starts at Patient Registration, explicitly "without patient login" (i.e., staff can register a patient before that patient ever logs in themselves).</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 5: HOSPITAL ONBOARDING & DEPARTMENTS -->
+            <section>
+                <div>
+                    <h3>🏥 Hospital Onboarding &amp; Departments</h3>
+                    <div>▼</div>
+                </div>
+                <div>
+                    <div>
+graph TB
+    A["Hospital applies\n+ uploads government certificate\n(proof hospital exists)"] --&gt; B["Temporary Approval\n(granted automatically)"]
+    B --&gt; C["Offline Super Admin Review"]
+    C --&gt;|Validated| D["Ratified — Full Service"]
+    C --&gt;|Not Validated| E["Service Stopped"]
+    D --&gt; F["Decide Departments\n(present/absent per hospital)"]
+    F --&gt; G["Decide Packages\n(Normal / Abnormal / LSCS / NICU)"]
+    G --&gt; H["Configure Rate Lists\n(USG, Lab) + Header/Footer Branding"]
+    H --&gt; I["Go Live"]
+                    </div>
+                    <details>
+                        <summary>View diagram source (Mermaid)</summary>
+                        <pre><code>graph TB
+    A["Hospital applies + uploads government certificate (proof hospital exists)"] --&gt; B["Temporary Approval (granted automatically)"]
+    B --&gt; C["Offline Super Admin Review"]
+    C --&gt;|Validated| D["Ratified — Full Service"]
+    C --&gt;|Not Validated| E["Service Stopped"]
+    D --&gt; F["Decide Departments (present/absent per hospital)"]
+    F --&gt; G["Decide Packages (Normal / Abnormal / LSCS / NICU)"]
+    G --&gt; H["Configure Rate Lists (USG, Lab) + Header/Footer Branding"]
+    H --&gt; I["Go Live"]</code></pre>
+                    </details>
+
+                    <h3>Registration Flow</h3>
+                    <ul>
+                        <li>Onboarding begins when a hospital starts registration; a government certificate/receipt proving the hospital's existence must be uploaded.</li>
+                        <li>Upload grants <strong>temporary approval</strong> immediately; an offline Super Admin later ratifies the hospital or stops the service if the document doesn't validate.</li>
+                        <li>The "250k" initialization step (see <a href="#subscription">Subscription &amp; Billing Models</a>) is also part of hospital onboarding.</li>
+                        <li>Header and footer branding must be uploaded before the hospital can proceed with example/sample configuration.</li>
+                    </ul>
+
+                    <h3>Departments</h3>
+                    <p>Each hospital decides which departments are present, independently: USG, Lab, NICU, LSCS, RMO, Lady Doctor, LR Staff, Billing Reception. Any combination — including none — is allowed at setup, but once decided, the selection is locked (not changeable later).</p>
+                    <table>
+                        <thead><tr><th>Department</th><th>Configurable?</th></tr></thead>
+                        <tbody>
+                            <tr><td>USG</td><td>Optional, locked after onboarding</td></tr>
+                            <tr><td>Lab</td><td>Optional, locked after onboarding</td></tr>
+                            <tr><td>NICU</td><td>Optional, locked after onboarding</td></tr>
+                            <tr><td>LSCS</td><td>Optional, locked after onboarding</td></tr>
+                            <tr><td>RMO</td><td>Optional, locked after onboarding</td></tr>
+                            <tr><td>Lady Doctor</td><td>Optional, locked after onboarding</td></tr>
+                            <tr><td>LR Staff</td><td>Optional, locked after onboarding</td></tr>
+                            <tr><td>Billing Reception</td><td>Optional, locked after onboarding</td></tr>
+                        </tbody>
+                    </table>
+
+                    <div>
+                        <strong>Configurability flow</strong> spans several linked terms: Workflows, Departments, Charge Categories, Package Limits, Staff Permissions, Module.
+                    </div>
+
+                    <div>
+                        <strong>Possible grouping not fully clear:</strong> the source lists USG / Lab / NICU / LSCS / RMO together under "Decide Departments," separately from Lady Doctor / LR Staff / Billing Reception listed just after. It's ambiguous whether the source intends two distinct groups — e.g., "clinical departments" vs. "staff roles" — with different configurability rules, or whether all eight are meant as one flat list. Treated here as one list pending clarification. "61. Changes i" does not resolve this.
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 6: PAAS -> SAAS -->
+            <section>
+                <div>
+                    <h3>🔀 PaaS → SaaS Journey</h3>
+                    <div>▼</div>
+                </div>
+                <div>
+                    <p>Configuration is identical whether a hospital is on PaaS or SaaS — Hospital Admin owns all configuration either way. "61. Changes i" reframes this upgrade path as a tracked <strong>journey</strong>: the platform explicitly identifies/flags whether a tenant is on PaaS or SaaS, and Hospital Admin now owns branding specifically at the "SaaS journey receiver end." SaaS adds exactly four differentiators on top of the PaaS base:</p>
+                    <div>
+                        <div>
+                            <h4>®️ Trademark Registration</h4>
+                            <p>Significant independence via the hospital's own registered trademark (assisted, 3-step document process; 2-step follow-up).</p>
+                        </div>
+                        <div>
+                            <h4>📱 Own Signature App</h4>
+                            <p>Hospital gets its own branded app rather than operating inside the shared platform app.</p>
+                        </div>
+                        <div>
+                            <h4>🏪 Direct Store Listing</h4>
+                            <p>Direct Play Store / Apple Store presence (own developer listing), not bundled under the platform's account.</p>
+                        </div>
+                        <div>
+                            <h4>🖥️ Self Server Hosting</h4>
+                            <p>Option to self-host rather than run on shared platform infrastructure.</p>
+                        </div>
+                    </div>
+                    <div>
+                        An automated procedure is planned for Play Store / App Store submission; the hospital supplies its own branded APK for submission. Exact submission tooling is still pending (see <a href="#open">Open Decisions</a>).
+                    </div>
+                    <div>
+                        <strong>🌐 World Wide Setup <span>NEW</span>:</strong> "61. Changes i" adds a "World Wide Setup" item alongside the PaaS→SaaS journey and Cross-Tenant Patient Traversal, implying eventual multi-region/international deployment. No further detail is given — tracked here and in <a href="#vision">Vision &amp; Roadmap</a> as a roadmap item, not a committed spec.
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 7: ANTENATAL, DOCUMENT UPLOAD & EDD -->
+            <section>
+                <div>
+                    <h3>📅 Antenatal, Document Upload &amp; EDD</h3>
+                    <div>▼</div>
+                </div>
+                <div>
+                    <p>Registration Staff (USG Staff or Lady Doctor) register the patient and upload documents as part of the antenatal journey. EDD (Expected Date of Delivery) itself is calculated by the new <strong>EDD Service</strong>, which is deliberately narrower than registration: it accepts only USG-report data.</p>
+
+                    <div>
+                        <strong>✅ Resolved — who can register:</strong> both USG Staff and Lady Doctor are now explicitly grouped as "Registration Staff" with equal rights to register a patient and upload documents (see <a href="#roles">Roles &amp; Permissions</a>). This replaces the v0.1 contradiction.
+                    </div>
+
+                    <h3>EDD Service rules <span>NEW</span></h3>
+                    <ul>
+                        <li>EDD can be set <strong>only from a USG report</strong> — never from LMP alone.</li>
+                        <li>The USG report may be from <strong>this hospital or an outside facility</strong> — an external report is acceptable as long as it is uploaded.</li>
+                        <li><strong>All patient reports should be uploaded</strong> to the platform (via the Antenatal Service / Document Service), including outside USG reports used for EDD.</li>
+                        <li>EDD is calculated from the <strong>first report where the baby has a detectable heartbeat / fetal activity</strong> — not simply the first USG report on file.</li>
+                        <li>EDD-setting remains USG's exclusive prerogative — Registration Staff enters the registration, but the EDD value itself is derived by the EDD Service from the qualifying report.</li>
+                    </ul>
+
+                    <div>
+                        <strong>Interaction with the v0.1 tolerance/freeze rules not fully specified:</strong> "61. Changes i" defines the EDD <em>source</em> (first heartbeat-positive USG report, any facility) but does not explicitly restate whether the v0.1 tolerance windows and freeze rule (below) still apply unchanged on top of this new sourcing rule, or whether they are superseded. Treated here as complementary — sourcing rule determines <em>which report</em> counts; tolerance/freeze rules determine <em>how discrepancies across multiple qualifying reports</em> are handled — pending confirmation.
+                    </div>
+
+                    <table>
+                        <thead><tr><th>Gestational Age</th><th>Allowed EDD Tolerance</th></tr></thead>
+                        <tbody>
+                            <tr><td>Up to 34 weeks</td><td>± 2 weeks (e.g., LMP EDD of 28.09.26 must fall between 15.09.26 and 11.10.26)</td></tr>
+                            <tr><td>34–35 weeks</td><td>± 3 weeks</td></tr>
+                            <tr><td>36 weeks onward</td><td>± 4 weeks</td></tr>
+                        </tbody>
+                    </table>
+                    <div>
+                        <strong>Freeze rule:</strong> if a patient is scanned multiple times across these windows (&lt;34, 34–35, &gt;35 weeks), the <em>earliest</em> EDD value is taken, frozen, and never recalculated afterward.
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 8: GATE FLOW -->
+            <section>
+                <div>
+                    <h3>🚦 Gate Flow</h3>
+                    <div>▼</div>
+                </div>
+                <div>
+                    <div>
+graph LR
+    REG["Registration\n(EDD set by EDD Service)"] --&gt; G1["Gate 1\n(formerly 'Gate 2')\nUnlocked by LR Staff"]
+    G1 --&gt;|Natural path| G2["Gate 2\n(Natural Archive track)"]
+    REG --&gt;|"EDD + 1 month, no-show"| G3["Gate 3\n(Forced Archive track)"]
+    G1 -.crossing disables.-&gt; G3
+    G2 --&gt; NA["Natural Archive"]
+    G3 --&gt; FA["Forced Archive"]
+                    </div>
+                    <details>
+                        <summary>View diagram source (Mermaid)</summary>
+                        <pre><code>graph LR
+    REG["Registration (EDD set by EDD Service)"] --&gt; G1["Gate 1 (formerly 'Gate 2') — Unlocked by LR Staff"]
+    G1 --&gt;|Natural path| G2["Gate 2 (Natural Archive track)"]
+    REG --&gt;|"EDD + 1 month, no-show"| G3["Gate 3 (Forced Archive track)"]
+    G1 -.crossing disables.-&gt; G3
+    G2 --&gt; NA["Natural Archive"]
+    G3 --&gt; FA["Forced Archive"]</code></pre>
+                    </details>
+                    <ul>
+                        <li>There is no "Gate 0" — that stage is already covered by registration/EDD.</li>
+                        <li>G1 and G2 relate to the Natural Archive path; G3 relates to the Forced Archive path.</li>
+                        <li>Forced archive triggers one month after EDD expiry with no patient show — the patient can still come in at any point during that one-month window (e.g., on the last day of expiry).</li>
+                        <li>If G1 has already been crossed, G3 (forced archive) is disabled.</li>
+                        <li>Once past Gate 1, the workflow becomes a simple hospital service: charges are added and the package limit applies (LR Room/NICU staff aren't separately gated here, since there's no inter-service summation or package discount beyond the configured/overridden amount).</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- SECTION 9: ARCHIVE ARCHITECTURE -->
+            <section>
+                <div>
+                    <h3>🗃️ Archive Architecture</h3>
+                    <div>▼</div>
+                </div>
+                <div>
+                    <div>
+stateDiagram-v2
+    [*] --&gt; ACTIVE : Patient Registered
+    ACTIVE --&gt; NATURAL_ARCHIVE : Delivery done + Payment done (90-day cooldown, override-able in exceptions)
+    ACTIVE --&gt; FORCED_ARCHIVE : EDD expired, 1 month no-show
+    NATURAL_ARCHIVE --&gt; [*]
+    FORCED_ARCHIVE --&gt; [*]
+    note right of ACTIVE
+        Chat disabled as soon as LR
+        notifies Delivery Done, or
+        on Forced Archive
+    end note
+                    </div>
+                    <details>
+                        <summary>View diagram source (Mermaid)</summary>
+                        <pre><code>stateDiagram-v2
+    [*] --&gt; ACTIVE : Patient Registered
+    ACTIVE --&gt; NATURAL_ARCHIVE : Delivery done + Payment done (90-day cooldown, override-able in exceptions)
+    ACTIVE --&gt; FORCED_ARCHIVE : EDD expired, 1 month no-show
+    NATURAL_ARCHIVE --&gt; [*]
+    FORCED_ARCHIVE --&gt; [*]
+    note right of ACTIVE
+        Chat disabled as soon as LR notifies Delivery Done, or on Forced Archive
+    end note</code></pre>
+                    </details>
+
+                    <table>
+                        <thead><tr><th>Archive Type</th><th>Trigger</th><th>Notes</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Natural Archive</strong></td><td>Delivery done + payment done</td><td>90-day cooldown; the cooldown is arbitrary and can be overridden in exceptional circumstances</td></tr>
+                            <tr><td><strong>Forced Archive</strong></td><td>EDD expired, one month of no-show</td><td>Every EDD expires one month after its date; if the patient never returns, they are treated as having delivered outside the hospital</td></tr>
+                        </tbody>
+                    </table>
+
+                    <div>
+                        <strong>Status transitions:</strong> ACTIVE ↔ ARCHIVED, governed by the defined protocol above. Chat access is removed <strong>as soon as LR Staff notifies that delivery is done, or on forced archive</strong> — a slightly earlier/more specific trigger than "archived" in general (v0.1 said only "once archived"). An archived patient is no longer an expectant customer, so there is no ongoing basis for chat.
+                    </div>
+
+                    <h3>Illustrative Volume Scenario (from source notes)</h3>
+                    <p>The source walks through a month-by-month patient count to illustrate how forced-archive volume accumulates — each cohort's EDD expires exactly one month after its registration month, so a patient registered on 1.2.2026 who hasn't shown up by 1.3.2026 is treated as having delivered elsewhere.</p>
+                    <table>
+                        <thead><tr><th>Month</th><th>Cumulative Patients (example)</th></tr></thead>
+                        <tbody>
+                            <tr><td>1.1.2026</td><td>10</td></tr>
+                            <tr><td>1.2.2026 – 1.10.2026</td><td>Grows to ~300 → 550 → 750 → 1,000 across the period</td></tr>
+                            <tr><td>1.11.2026</td><td>What happens after 11 months is unspecified</td></tr>
+                        </tbody>
+                    </table>
+                    <div><strong>Flagged:</strong> this reads as an illustrative example rather than a hard specification (see <a href="#open">Open Decisions</a>).</div>
+                </div>
+            </section>
+
+            <!-- SECTION 10: SUMMING ENGINE & CHARGES -->
+            <section>
+                <div>
+                    <h3>🧮 Summing Engine &amp; Charges</h3>
+                    <div>▼</div>
+                </div>
+                <div>
+                    <p>The Summing Engine aggregates charges across 4 delivery categories and 2 rate lists, and is the arbiter of the package cap concept (applies only to Normal Delivery). The discharge receipt is the final document once summing is complete — and once it's issued, all other documents on that case become final too.</p>
+
+                    <table>
+                        <thead><tr><th>Category</th><th>Amount Type</th><th>Notes</th></tr></thead>
+                        <tbody>
+                            <tr><td><strong>Normal Delivery</strong></td><td>Proper amount</td><td>Subject to summing engine; package cap stops standard charges at the declared limit</td></tr>
+                            <tr><td><strong>Abnormal Delivery</strong></td><td>Token amount</td><td>~30% of deliveries; normal package logic doesn't apply, so charge bounce is expected (e.g., ₹12,000 → ₹15,000) for complications like breech, face presentation, oxygen, blood transfusion, vacuum-assist, or extended delivery time</td></tr>
+                            <tr><td><strong>LSCS</strong></td><td>Token amount</td><td>~50% of Abnormal Delivery cases escalate to LSCS (≈15% of all deliveries are neither Normal nor LSCS outright — they pass through Abnormal first). Example configuration from source: LSCS adds ₹20,000 on top of the ₹12,000 Normal Delivery (ND) base.</td></tr>
+                            <tr><td><strong>NICU</strong></td><td>Token amount</td><td>Can attach on top of Normal, Abnormal, or LSCS — a 4th, independent situation. Example configuration from source: NICU adds ₹25,000 besides the ₹12,000 ND base.</td></tr>
+                        </tbody>
+                    </table>
+                    <p>These per-category amounts are LR Staff-configured at the point delivery is confirmed (as soon as LSCS and/or NICU is flagged, the corresponding add-on charge is applied) — this is also why there's no separate "LSCS Room staff" or "NICU staff" role: there's no inter-service summation or package discount at that stage, only the configured amount or an override.</p>
+
+                    <table>
+                        <thead><tr><th>Rate List</th><th>Amount Type</th><th>Notes</th></tr></thead>
+                        <tbody>
+                            <tr><td>USG</td><td>Proper amount</td><td>Tentative, hospital-configured</td></tr>
+                            <tr><td>Lab</td><td>Proper amount</td><td>Tentative, hospital-configured; Lab Staff can add charges here but cannot register/set EDD</td></tr>
+                            <tr><td>OPD</td><td>—</td><td>No rate list exists; configuration still pending</td></tr>
+                        </tbody>
+                    </table>
+
+                    <div>
+                        <strong>Charge flow, no override:</strong> normal summation applies as configured.<br>
+                        <strong>Charge flow, override:</strong> requires an automatic, system-generated explanation for why and what was overridden, reflected across all counters except USG and adders/enterers. Applies across <strong>all rate lists/charges</strong>, not just delivery. Override is never available before delivery.
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 11: SUBSCRIPTION & BILLING MODELS -->
+            <section>
+                <div>
+                    <h3>🪙 Subscription &amp; Billing Models</h3>
+                    <div>▼</div>
+                </div>
+                <div>
+                    <p><strong>New in v0.2:</strong> a hospital is no longer assumed to be on the coin ledger by default — each tenant now chooses <strong>one of three</strong> subscription/billing models. The Subscription Service is being generalised from a single coin ledger into a model-selectable billing engine.</p>
+
+                    <div>
+                        <div>
+                            <div>Model 1</div>
+                            <div>🪙 Coin-Based</div>
+                            <ul>
+                                <li>50 coins deducted per registration entry</li>
+                                <li>A "transaction" = any addition of payment</li>
+                                <li>1% price increments permitted above 10,000 coins</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <div>Model 2 <span>NEW</span></div>
+                            <div>📊 Double Delivery Figure</div>
+                            <ul>
+                                <li>Source terms: "Original Delivery Averages" / "Double Delivery Numbers"</li>
+                                <li>Reads as: subscription cost tracks roughly double the hospital's average delivery volume/revenue figure</li>
+                                <li>Exact formula not specified — see Open Decisions</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <div>Model 3 <span>NEW</span></div>
+                            <div>📐 Fixed Subscription</div>
+                            <ul>
+                                <li>Source term: "Fixed Subscription Slabs"</li>
+                                <li>Starts at ₹5,000</li>
+                                <li>Escalates up to "triple delivery numbers"</li>
+                                <li>Slab boundaries not specified — see Open Decisions</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div>
+                        <strong>Models 2 &amp; 3 need precise definitions:</strong> the source gives only short labels ("Double Delivery Figure" / "Original Delivery Averages" / "Double Delivery Numbers" for Model 2; "Fixed starting from 5000 and escalating to triple delivery numbers" for Model 3) without a worked formula or slab table. The wording above is the closest literal reading; do not implement the billing math from it without confirming with the source author.
+                    </div>
+
+                    <table>
+                        <thead><tr><th>Rule</th><th>Value / Behaviour</th></tr></thead>
+                        <tbody>
+                            <tr><td>Coin deduction (Model 1)</td><td>50 coins deducted per registration entry (a "transaction" is defined as any addition of payment)</td></tr>
+                            <tr><td>Pricing flexibility (Model 1)</td><td>1% price increments still permitted after 10,000 coins (exception to otherwise fixed pricing)</td></tr>
+                            <tr><td>Payment gateway</td><td>Provided to the hospital as part of onboarding</td></tr>
+                            <tr><td>Brand / trademark assistance</td><td>Logo creation assistance; trademark registration is a 3-step document process (guided), with a 2-step follow-up</td></tr>
+                            <tr><td>250,000 threshold</td><td><span>Open decision</span> — behaviour after this threshold not yet defined (see <a href="#open">Open Decisions</a>)</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- SECTION 12: CHAT & NOTIFICATIONS -->
+            <section>
+                <div>
+                    <h3>💬 Chat &amp; Notifications</h3>
+                    <div>▼</div>
+                </div>
+                <div>
+                    <h3>In-App Chat</h3>
+                    <ul>
+                        <li>Participants limited strictly to: <strong>Patient ↔ RMO/Lady Doctor ↔ Hospital Admin</strong>.</li>
+                        <li>ANC, USG, and Lab staff cannot chat, except the Lady Doctor.</li>
+                        <li>Billing Reception has no in-app chat access.</li>
+                        <li>Chat is disabled as soon as <strong>LR Staff notifies "Delivery done"</strong>, or on forced archive — not only on generic archive as v0.1 stated.</li>
+                        <li><strong>Resolved:</strong> when more than one Lady Doctor is assigned to a case, RMO's chat/clinical duties are carried by the Lady Doctor(s) — see <a href="#roles">Roles &amp; Permissions</a>.</li>
+                        <li><strong>"N-Chaining"</strong> — mentioned alongside in-app chat with no elaboration <span>open</span>. Possibly related to the undefined "N-chain" / "N-Loggers" terms from v0.1 — see <a href="#open">Open Decisions</a>.</li>
+                    </ul>
+
+                    <h3>Notification Service — alerts are broader in v0.2</h3>
+                    <p>Source framing: <em>"everything is an alert — anything done by anybody or by the system itself becomes an alert."</em> Alert categories called out explicitly:</p>
+                    <ul>
+                        <li>Incident / system alerts</li>
+                        <li>Subscription alerts</li>
+                        <li>Branding alerts</li>
+                        <li>Complaint alerts</li>
+                        <li>Overriding alerts</li>
+                        <li>Coin-ledger entry alerts (e.g. a 50-coin deduction entry)</li>
+                        <li>...and other events, per the source's open-ended "etc."</li>
+                    </ul>
+                    <ul>
+                        <li>Weekly and monthly SMS reports are sent to Hospital Admin via the Notification Service.</li>
+                        <li>On-call alerting uses AWS SNS directly — no third-party paging tool required.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- SECTION 13: RECONCILIATION & OVERRIDES -->
+            <section>
+                <div>
+                    <h3>🔍 Reconciliation &amp; Overrides</h3>
+                    <div>▼</div>
+                </div>
+                <div>
+                    <div>
+                        <strong>Preserve-all-entries policy:</strong> wrong entries and overridden entries are <em>never deleted</em> — they are preserved permanently. This full history enables staff appraisals and a reprimand flow that assigns accountability, now explicitly owned by Hospital Admin as "Mistake High Light / Reprimand" (role-restricted — see <a href="#roles">Roles &amp; Permissions</a>).
+                    </div>
+                    <ul>
+                        <li>Manual overrides can also be performed by Billing Reception (equivalent to LR Staff rights) once past Gate 1; the 90-day cooldown no longer applies at that point.</li>
+                        <li>Manual override now applies across <strong>all rate lists/charges</strong>, not only delivery charges.</li>
+                        <li>Override audit reports are available to Super Admin across all hospitals.</li>
+                        <li>Super Admin can view usage breakdown — API calls weighted by operation cost — per hospital, for platform-level billing/capacity insight.</li>
+                        <li>Hospital Admin can <strong>merge and demerge staff roles</strong> — e.g. temporarily combining two role assignments onto one staff member and splitting them apart again. Not yet detailed beyond the label.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- SECTION 13b: COMPLAINTS & MONITORING (NEW) -->
+            <section>
+                <div>
+                    <h3>📢 Complaints &amp; Monitoring <span>NEW</span></h3>
+                    <div>▼</div>
+                </div>
+                <div>
+                    <p>"61. Changes i" introduces a platform-wide complaint-routing model and a Super Admin monitoring/outage responsibility. Every operational role now has an explicit complaint path, and the platform is expected to surface outages to Super Admin before anyone else does.</p>
+
+                    <div>
+graph TB
+    LAB["Lab Staff"] --&gt; HA["Hospital Admin"]
+    REGS["Registration Staff"] --&gt; HA
+    LRS["LR Staff"] --&gt; HA
+    BILL["Billing Reception"] --&gt; HA
+    RMO["RMO"] --&gt; HA
+    PAT["Patient"] --&gt;|auto-directed| SA["Super Admin"]
+    PAT --&gt;|auto-directed| HA
+    HA --&gt;|forwards / lodges| SA
+    SA --&gt; AUTH2["Authorities\n(other intersection complaints)"]
+                    </div>
+                    <details>
+                        <summary>View diagram source (Mermaid)</summary>
+                        <pre><code>graph TB
+    LAB["Lab Staff"] --&gt; HA["Hospital Admin"]
+    REGS["Registration Staff"] --&gt; HA
+    LRS["LR Staff"] --&gt; HA
+    BILL["Billing Reception"] --&gt; HA
+    RMO["RMO"] --&gt; HA
+    PAT["Patient"] --&gt;|auto-directed| SA["Super Admin"]
+    PAT --&gt;|auto-directed| HA
+    HA --&gt;|forwards / lodges| SA
+    SA --&gt; AUTH2["Authorities (other intersection complaints)"]</code></pre>
+                    </details>
+
+                    <table>
+                        <thead><tr><th>Complainant / Source</th><th>Routed To</th></tr></thead>
+                        <tbody>
+                            <tr><td>Registration Staff, Lab Staff, LR Staff, Billing Reception, RMO</td><td>Hospital Admin</td></tr>
+                            <tr><td>Hospital Admin (can also lodge/forward)</td><td>Super Admin</td></tr>
+                            <tr><td>Patient</td><td>Auto-directed to both Super Admin <em>and</em> Hospital Admin</td></tr>
+                            <tr><td>Cross-journey complaints (patients crossing tenants)</td><td>Super Admin</td></tr>
+                            <tr><td>Other intersection complaints</td><td>Super Admin → relevant authorities</td></tr>
+                        </tbody>
+                    </table>
+
+                    <div>
+                        <strong>Platform monitoring:</strong> Super Admin owns a monitoring dashboard covering outages and lockouts — the design intent is that if the site or any functionality stops working, Super Admin is the <em>first</em> to know, ahead of hospitals reporting it.
+                    </div>
+
+                    <div>
+                        <strong>Not yet specified:</strong> complaint SLAs, categorisation/priority scheme, and whether complaint records feed into the staff-appraisal/reprimand flow described in <a href="#reconciliation">Reconciliation &amp; Overrides</a>.
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 14: MULTI-TENANCY & FEATURE FLAGS -->
+            <section>
+                <div>
+                    <h3>🏢 Multi-Tenancy &amp; Feature Flags</h3>
+                    <div>▼</div>
+                </div>
+                <div>
+                    <div>
+                        <strong>Feature flags:</strong> because this is a multi-tenant application, feature flags are needed to track which app version is "live" and which client (hospital) is running which version — important for staged rollouts and version-specific support.
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 14b: CROSS-TENANT PATIENT TRAVERSAL (NEW) -->
+            <section>
+                <div>
+                    <h3>🌐 Cross-Tenant Patient Traversal <span>NEW</span></h3>
+                    <div>▼</div>
+                </div>
+                <div>
+                    <p>A new platform capability from "61. Changes i": patients — never tenants — can traverse across hospitals on the platform. Multi-tenancy still isolates each hospital's operational data, but a patient's identity/history can be looked up across tenant boundaries when needed for continuity of care.</p>
+                    <div>
+                        <div>
+                            <h4>✅ In scope</h4>
+                            <p>Patient records/lookup traversing tenant boundaries (e.g. a patient who registers at a second hospital) — backed by the Patient Registry Service's new "cross-tenant records for patients" responsibility and the Search Service's new global tier.</p>
+                        </div>
+                        <div>
+                            <h4>🚫 Out of scope</h4>
+                            <p>Tenants themselves are explicitly <strong>not</strong> traversable/mergeable — each hospital's configuration, staff, and operational data stay isolated per tenant as before.</p>
+                        </div>
+                    </div>
+                    <div>
+                        <strong>Not yet specified:</strong> which roles can invoke a cross-tenant / global search, what data is visible across tenants versus redacted, and whether the receiving hospital needs patient consent before viewing another tenant's history.
+                    </div>
+                </div>
+            </section>
+
+            <!-- SECTION 15: TECHNICAL INFRASTRUCTURE -->
+            <section>
+                <div>
+                    <h3>☁️ Technical Infrastructure</h3>
+                    <div>▼</div>
+                </div>
+                <div>
+                    <table>
+                        <thead><tr><th>Concern</th><th>Choice</th><th>Notes</th></tr></thead>
+                        <tbody>
+                            <tr><td>Document storage</td><td>AWS S3</td><td>Treated as infrastructure, not a microservice</td></tr>
+                            <tr><td>Content delivery</td><td>ALB (no CDN)</td><td>CDN explicitly deferred; ALB used in its place for now</td></tr>
+                            <tr><td>On-call alerting</td><td>AWS SNS</td><td>No third-party paging tool required</td></tr>
+                            <tr><td>Ingress</td><td>Client → ALB → API Gateway → Microservices</td><td>Various additional networks/flows exist, grouped under business rules</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- SECTION 16: TECHNOLOGY STACK -->
+            <section>
+                <div>
+                    <h3>🛠️ Technology Stack</h3>
+                    <div>▼</div>
+                </div>
+                <div>
+                    <p>Only choices explicitly confirmed in the source notes are listed as decided; everything else (application framework, mobile stack, specific auth libraries, multilingual/voice tooling, etc.) is not yet specified.</p>
+                    <table>
+                        <thead><tr><th>Layer</th><th>Confirmed Choice</th><th>Status</th></tr></thead>
+                        <tbody>
+                            <tr><td>Architecture style</td><td>Microservices behind API Gateway</td><td><span>Confirmed</span></td></tr>
+                            <tr><td>Database</td><td>PostgreSQL</td><td><span>Confirmed</span></td></tr>
+                            <tr><td>Document storage</td><td>AWS S3</td><td><span>Confirmed</span></td></tr>
+                            <tr><td>Load balancing</td><td>AWS ALB</td><td><span>Confirmed</span></td></tr>
+                            <tr><td>On-call / alerting</td><td>AWS SNS</td><td><span>Confirmed</span></td></tr>
+                            <tr><td>CDN</td><td>None (deferred)</td><td><span>Deferred</span></td></tr>
+                            <tr><td>App framework (web/mobile)</td><td>Not specified</td><td><span>Not yet specified</span></td></tr>
+                            <tr><td>Backend runtime/language</td><td>Not specified</td><td><span>Not yet specified</span></td></tr>
+                            <tr><td>Auth mechanism</td><td>Not specified (Identity/Authorisation Service scope only)</td><td><span>Not yet specified</span></td></tr>
+                            <tr><td>Multilingual / i18n</td><td>Not specified</td><td><span>Vision-stage</span></td></tr>
+                            <tr><td>Voice interaction</td><td>Not specified</td><td><span>Vision-stage</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+
+           
+            <footer>
+                <p>Maternal Care Platform — Architecture Blueprint </p>
+              
+            </footer>
+        </main>
+    </div>
+
+    
+    
+
+
+</body></html>
