@@ -1,0 +1,53 @@
+{
+  "entity_type": "workItem",
+  "entity_id": "WI-tenant-onboarding-form",
+  "assigned_to": "GjygcVHfhzLIKe2UHESUovRGK1z2",
+  "status": "pending",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "text",
+      "text": "docs/techstack.md still lists the frontend framework as 'Not Yet Specified'. Which framework should web-ui use for the onboarding form, hospital profile and Super Admin alert screens (e.g. React, Angular, Vue, Next.js)?",
+      "required": true,
+      "answer": null,
+      "answered_by": null,
+      "answered_at": null
+    },
+    {
+      "id": "q2",
+      "type": "text",
+      "text": "The Requirement also needs backend work: saving the form, locking the counts, logging Super Admin corrections, calculating yearly averages, and the 2x/3x alert checks. The only application is web-ui. Should this Work Item cover both the UI and the backend, or only the web-ui screens (with the backend as a separate Work Item/application)? If it includes the backend, which runtime/language should the microservices use (not yet specified in techstack.md)?",
+      "required": true,
+      "answer": null,
+      "answered_by": null,
+      "answered_at": null
+    },
+    {
+      "id": "q3",
+      "type": "text",
+      "text": "The form is filled in at first sign-up, but the auth mechanism is 'Not Yet Specified' in techstack.md. How does the tenant create their login: email + password, phone OTP, Google sign-in, or something else? And is creating the login part of this Work Item?",
+      "required": true,
+      "answer": null,
+      "answered_by": null,
+      "answered_at": null
+    },
+    {
+      "id": "q4",
+      "type": "text",
+      "text": "The data store is a per-tenant web-based SQLite database. Where should the onboarding form data and baseline counts be stored: in a platform-level (Super Admin) database, or in the new tenant's own database created at sign-up? Super Admin alerts need to read across all tenants.",
+      "required": true,
+      "answer": null,
+      "answered_by": null,
+      "answered_at": null
+    },
+    {
+      "id": "q5",
+      "type": "text",
+      "text": "How often should the 2x/3x alert check run: each time a delivery/USG/NICU/LSCS event is recorded, or as a scheduled job (e.g. daily)? And how should the Super Admin receive alerts: an in-app alert list only, or also email/SMS?",
+      "required": true,
+      "answer": null,
+      "answered_by": null,
+      "answered_at": null
+    }
+  ]
+}
