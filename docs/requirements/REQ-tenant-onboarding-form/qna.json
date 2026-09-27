@@ -1,0 +1,62 @@
+{
+  "entity_type": "requirement",
+  "entity_id": "REQ-tenant-onboarding-form",
+  "assigned_to": "GjygcVHfhzLIKe2UHESUovRGK1z2",
+  "status": "pending",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "text",
+      "text": "Which personal and institution details should the tenant enter besides the volume figures (e.g. contact person name, phone, email, hospital name, address, registration number)? Which of these are mandatory?",
+      "required": true,
+      "answer": null,
+      "answered_by": null,
+      "answered_at": null
+    },
+    {
+      "id": "q2",
+      "type": "text",
+      "text": "What time period do the volume figures (USGs, deliveries, caesareans, NICU, MTPs) cover: per month, per year, or something else? Are they self-declared estimates, with no verification?",
+      "required": true,
+      "answer": null,
+      "answered_by": null,
+      "answered_at": null
+    },
+    {
+      "id": "q3",
+      "type": "text",
+      "text": "What exactly does 'No. NICU things' mean: NICU admissions per period, number of NICU beds, or both?",
+      "required": true,
+      "answer": null,
+      "answered_by": null,
+      "answered_at": null
+    },
+    {
+      "id": "q4",
+      "type": "text",
+      "text": "Should 'No. of deliveries' include caesareans (with caesareans as a subset), or should it count only normal deliveries?",
+      "required": true,
+      "answer": null,
+      "answered_by": null,
+      "answered_at": null
+    },
+    {
+      "id": "q5",
+      "type": "text",
+      "text": "Where does this form sit in the blueprint's onboarding flow: during the initial application (with the government certificate upload), or after ratification alongside department selection? Can the tenant edit the figures later, or are they locked like departments?",
+      "required": true,
+      "answer": null,
+      "answered_by": null,
+      "answered_at": null
+    },
+    {
+      "id": "q6",
+      "type": "text",
+      "text": "Do these figures feed anything downstream, for example the 'Double Delivery Figure' / 'Original Delivery Averages' subscription model or Super Admin review? Or are they informational only?",
+      "required": true,
+      "answer": null,
+      "answered_by": null,
+      "answered_at": null
+    }
+  ]
+}
