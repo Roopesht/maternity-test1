@@ -48,6 +48,33 @@
       "answer": null,
       "answered_by": null,
       "answered_at": null
+    },
+    {
+      "id": "q6",
+      "type": "text",
+      "text": "techstack.md says 'web-based SQLite, per-tenant database'. Which SQLite option is meant: a SQLite file on the server via better-sqlite3, libSQL/Turso, Cloudflare D1, or other?",
+      "required": true,
+      "answer": null,
+      "answered_by": null,
+      "answered_at": null
+    },
+    {
+      "id": "q7",
+      "type": "text",
+      "text": "The blueprint has separate microservices (Tenant Provisioning, Subscription, Notification), but apps/backend is currently one Express app. Should this work go into apps/backend as separate modules/routes per service for now, or be set up as its own service?",
+      "required": true,
+      "answer": null,
+      "answered_by": null,
+      "answered_at": null
+    },
+    {
+      "id": "q8",
+      "type": "text",
+      "text": "The registration certificate upload goes to the Firebase document store. Is a Firebase project already set up with credentials available, or should this Work Item stub the upload for now?",
+      "required": true,
+      "answer": null,
+      "answered_by": null,
+      "answered_at": null
     }
   ]
 }
