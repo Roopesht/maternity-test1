@@ -20,6 +20,14 @@ Source of truth: [docs/project/blueprint.cleaned.html](docs/project/blueprint.cl
 - Microservices architecture behind an API Gateway
 - Ingress: Client Apps → CDN → AWS ALB → API Gateway → Microservices
 
+### Frontend
+
+- React + Vite + TypeScript
+
+### Backend
+
+- Node.js + Express + TypeScript
+
 ### Core Microservices
 
 - Identity Service (IAM, AuthN)
@@ -66,8 +74,7 @@ Source of truth: [docs/project/blueprint.cleaned.html](docs/project/blueprint.cl
 
 The blueprint explicitly defers these — do not assume a choice without confirming with the source author:
 
-- Frontend/mobile application framework (web and mobile)
-- Backend runtime/language for the microservices
+- Mobile application framework
 - Auth mechanism/library (Identity/Authorisation Service scope is defined; implementation is not)
 - Feature-flag system (needed for multi-tenant staged rollouts, mechanism unspecified)
 - Play Store/App Store submission tooling for the PaaS→SaaS "own app" journey

@@ -1,0 +1,42 @@
+.dashboard {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 3rem 1.5rem;
+  text-align: center;
+  font-family: system-ui, sans-serif;
+}
+
+.dashboard header h1 {
+  margin-bottom: 0.5rem;
+}
+
+.dashboard header p {
+  color: #666;
+}
+
+.status {
+  margin-top: 2rem;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.status-checking {
+  background: #eee;
+  color: #555;
+}
+
+.status-online {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.status-offline {
+  background: #fee2e2;
+  color: #991b1b;
+}

@@ -1,0 +1,53 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Backend: dev",
+      "type": "shell",
+      "command": "printf '\\n== Maternal Care Platform — Backend ==\\nNode.js + Express + TypeScript\\nhttp://localhost:3000/health\\n\\n' && npm run dev",
+      "options": {
+        "cwd": "${workspaceFolder}/apps/backend"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "echo": false,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated",
+        "clear": true,
+        "showReuseMessage": false,
+        "close": false
+      }
+    },
+    {
+      "label": "Frontend: dev",
+      "type": "shell",
+      "command": "printf '\\n== Maternal Care Platform — Frontend ==\\nReact + Vite + TypeScript\\nhttp://localhost:5173\\n\\n' && npm run dev",
+      "options": {
+        "cwd": "${workspaceFolder}/apps/frontend"
+      },
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "echo": false,
+        "reveal": "always",
+        "focus": false,
+        "panel": "dedicated",
+        "clear": true,
+        "showReuseMessage": false,
+        "close": false
+      }
+    },
+    {
+      "label": "Start apps",
+      "dependsOn": ["Backend: dev", "Frontend: dev"],
+      "dependsOrder": "parallel",
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
+}
