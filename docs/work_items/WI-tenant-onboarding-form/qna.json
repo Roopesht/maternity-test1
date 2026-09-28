@@ -2,79 +2,79 @@
   "entity_type": "workItem",
   "entity_id": "WI-tenant-onboarding-form",
   "assigned_to": "GjygcVHfhzLIKe2UHESUovRGK1z2",
-  "status": "pending",
+  "status": "completed",
   "questions": [
     {
       "id": "q1",
       "type": "text",
       "text": "docs/techstack.md still lists the frontend framework as 'Not Yet Specified'. Which framework should web-ui use for the onboarding form, hospital profile and Super Admin alert screens (e.g. React, Angular, Vue, Next.js)?",
       "required": true,
-      "answer": null,
-      "answered_by": null,
-      "answered_at": null
+      "answer": "React",
+      "answered_by": "GjygcVHfhzLIKe2UHESUovRGK1z2",
+      "answered_at": "2026-09-28T03:27:35.720Z"
     },
     {
       "id": "q2",
       "type": "text",
       "text": "The Requirement also needs backend work: saving the form, locking the counts, logging Super Admin corrections, calculating yearly averages, and the 2x/3x alert checks. The only application is web-ui. Should this Work Item cover both the UI and the backend, or only the web-ui screens (with the backend as a separate Work Item/application)? If it includes the backend, which runtime/language should the microservices use (not yet specified in techstack.md)?",
       "required": true,
-      "answer": null,
-      "answered_by": null,
-      "answered_at": null
+      "answer": "TS, nodejs",
+      "answered_by": "GjygcVHfhzLIKe2UHESUovRGK1z2",
+      "answered_at": "2026-09-28T03:27:35.720Z"
     },
     {
       "id": "q3",
       "type": "text",
       "text": "The form is filled in at first sign-up, but the auth mechanism is 'Not Yet Specified' in techstack.md. How does the tenant create their login: email + password, phone OTP, Google sign-in, or something else? And is creating the login part of this Work Item?",
       "required": true,
-      "answer": null,
-      "answered_by": null,
-      "answered_at": null
+      "answer": "not needed here, it is separate feature, which will be built separately later in RBAC",
+      "answered_by": "GjygcVHfhzLIKe2UHESUovRGK1z2",
+      "answered_at": "2026-09-28T03:27:35.720Z"
     },
     {
       "id": "q4",
       "type": "text",
       "text": "The data store is a per-tenant web-based SQLite database. Where should the onboarding form data and baseline counts be stored: in a platform-level (Super Admin) database, or in the new tenant's own database created at sign-up? Super Admin alerts need to read across all tenants.",
       "required": true,
-      "answer": null,
-      "answered_by": null,
-      "answered_at": null
+      "answer": "Dont worry about multi tenancy right now",
+      "answered_by": "GjygcVHfhzLIKe2UHESUovRGK1z2",
+      "answered_at": "2026-09-28T03:27:35.720Z"
     },
     {
       "id": "q5",
       "type": "text",
       "text": "How often should the 2x/3x alert check run: each time a delivery/USG/NICU/LSCS event is recorded, or as a scheduled job (e.g. daily)? And how should the Super Admin receive alerts: an in-app alert list only, or also email/SMS?",
       "required": true,
-      "answer": null,
-      "answered_by": null,
-      "answered_at": null
+      "answer": "monthly job",
+      "answered_by": "GjygcVHfhzLIKe2UHESUovRGK1z2",
+      "answered_at": "2026-09-28T03:27:35.720Z"
     },
     {
       "id": "q6",
       "type": "text",
       "text": "techstack.md says 'web-based SQLite, per-tenant database'. Which SQLite option is meant: a SQLite file on the server via better-sqlite3, libSQL/Turso, Cloudflare D1, or other?",
       "required": true,
-      "answer": null,
-      "answered_by": null,
-      "answered_at": null
+      "answer": "Turso",
+      "answered_by": "GjygcVHfhzLIKe2UHESUovRGK1z2",
+      "answered_at": "2026-09-28T03:27:35.720Z"
     },
     {
       "id": "q7",
       "type": "text",
       "text": "The blueprint has separate microservices (Tenant Provisioning, Subscription, Notification), but apps/backend is currently one Express app. Should this work go into apps/backend as separate modules/routes per service for now, or be set up as its own service?",
       "required": true,
-      "answer": null,
-      "answered_by": null,
-      "answered_at": null
+      "answer": "Separate Module",
+      "answered_by": "GjygcVHfhzLIKe2UHESUovRGK1z2",
+      "answered_at": "2026-09-28T03:27:35.720Z"
     },
     {
       "id": "q8",
       "type": "text",
       "text": "The registration certificate upload goes to the Firebase document store. Is a Firebase project already set up with credentials available, or should this Work Item stub the upload for now?",
       "required": true,
-      "answer": null,
-      "answered_by": null,
-      "answered_at": null
+      "answer": "right now not needed",
+      "answered_by": "GjygcVHfhzLIKe2UHESUovRGK1z2",
+      "answered_at": "2026-09-28T03:27:35.720Z"
     }
   ]
 }
