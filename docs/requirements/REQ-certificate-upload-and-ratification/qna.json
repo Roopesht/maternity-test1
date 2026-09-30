@@ -2,52 +2,52 @@
   "entity_type": "requirement",
   "entity_id": "REQ-certificate-upload-and-ratification",
   "assigned_to": "GjygcVHfhzLIKe2UHESUovRGK1z2",
-  "status": "pending",
+  "status": "completed",
   "questions": [
     {
       "id": "q1",
       "type": "text",
       "required": true,
       "text": "To confirm: temporary approval is granted automatically when the tenant submits the onboarding form at first sign-up, even with no certificate uploaded. So this flow starts at 'upload certificate' and then goes to Super Admin review, then Ratified or Stopped. Is that right?",
-      "answer": null,
-      "answered_by": null,
-      "answered_at": null
+      "answer": "Yes",
+      "answered_by": "GjygcVHfhzLIKe2UHESUovRGK1z2",
+      "answered_at": "2026-09-30T04:09:22.803Z"
     },
     {
       "id": "q2",
       "type": "text",
       "required": true,
       "text": "Is there a deadline for uploading the certificate while the hospital is temporarily approved (for example, 30 days)? If it passes with no upload, what happens: nothing, reminders only, or service stops automatically?",
-      "answer": null,
-      "answered_by": null,
-      "answered_at": null
+      "answer": "30 days is a good time, u can start reminders at 20 days, hard reminders 25 days onwards i.e intermittent stoppings",
+      "answered_by": "GjygcVHfhzLIKe2UHESUovRGK1z2",
+      "answered_at": "2026-09-30T04:09:22.803Z"
     },
     {
       "id": "q3",
       "type": "text",
       "required": true,
       "text": "What does 'stopped' mean for the hospital's users: fully locked out, read-only (can view and export existing patient data but not add new records), or something else? Is existing patient data kept?",
-      "answer": null,
-      "answered_by": null,
-      "answered_at": null
+      "answer": "read only can remain for another 30 days and after that complete lock",
+      "answered_by": "GjygcVHfhzLIKe2UHESUovRGK1z2",
+      "answered_at": "2026-09-30T04:09:22.803Z"
     },
     {
       "id": "q4",
       "type": "text",
       "required": true,
       "text": "If the Super Admin rejects the certificate, can the tenant upload a corrected one for another review, or is 'stopped' final unless the Super Admin reverses it? Should the Super Admin enter a reason that the tenant can see?",
-      "answer": null,
-      "answered_by": null,
-      "answered_at": null
+      "answer": "Super admin should be able to confirm this certificate from website, mail, hard letter or RTI. and reject it after that only and ofcourse tenant can put corrected one - 30 days will be counted from rejection",
+      "answered_by": "GjygcVHfhzLIKe2UHESUovRGK1z2",
+      "answered_at": "2026-09-30T04:09:22.803Z"
     },
     {
       "id": "q5",
       "type": "text",
       "required": true,
       "text": "How is the tenant told about their status (Temporary / Under review / Ratified / Stopped): only in the app, or also by email/SMS? And once ratified, can the tenant replace the certificate (for example, when it is renewed), and does that trigger a new review?",
-      "answer": null,
-      "answered_by": null,
-      "answered_at": null
+      "answer": "as the stage is",
+      "answered_by": "GjygcVHfhzLIKe2UHESUovRGK1z2",
+      "answered_at": "2026-09-30T04:09:22.803Z"
     }
   ]
 }
