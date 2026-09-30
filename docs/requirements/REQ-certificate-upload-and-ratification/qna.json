@@ -1,0 +1,53 @@
+{
+  "entity_type": "requirement",
+  "entity_id": "REQ-certificate-upload-and-ratification",
+  "assigned_to": "GjygcVHfhzLIKe2UHESUovRGK1z2",
+  "status": "pending",
+  "questions": [
+    {
+      "id": "q1",
+      "type": "text",
+      "required": true,
+      "text": "To confirm: temporary approval is granted automatically when the tenant submits the onboarding form at first sign-up, even with no certificate uploaded. So this flow starts at 'upload certificate' and then goes to Super Admin review, then Ratified or Stopped. Is that right?",
+      "answer": null,
+      "answered_by": null,
+      "answered_at": null
+    },
+    {
+      "id": "q2",
+      "type": "text",
+      "required": true,
+      "text": "Is there a deadline for uploading the certificate while the hospital is temporarily approved (for example, 30 days)? If it passes with no upload, what happens: nothing, reminders only, or service stops automatically?",
+      "answer": null,
+      "answered_by": null,
+      "answered_at": null
+    },
+    {
+      "id": "q3",
+      "type": "text",
+      "required": true,
+      "text": "What does 'stopped' mean for the hospital's users: fully locked out, read-only (can view and export existing patient data but not add new records), or something else? Is existing patient data kept?",
+      "answer": null,
+      "answered_by": null,
+      "answered_at": null
+    },
+    {
+      "id": "q4",
+      "type": "text",
+      "required": true,
+      "text": "If the Super Admin rejects the certificate, can the tenant upload a corrected one for another review, or is 'stopped' final unless the Super Admin reverses it? Should the Super Admin enter a reason that the tenant can see?",
+      "answer": null,
+      "answered_by": null,
+      "answered_at": null
+    },
+    {
+      "id": "q5",
+      "type": "text",
+      "required": true,
+      "text": "How is the tenant told about their status (Temporary / Under review / Ratified / Stopped): only in the app, or also by email/SMS? And once ratified, can the tenant replace the certificate (for example, when it is renewed), and does that trigger a new review?",
+      "answer": null,
+      "answered_by": null,
+      "answered_at": null
+    }
+  ]
+}
