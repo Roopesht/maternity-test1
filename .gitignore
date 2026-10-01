@@ -24,3 +24,4 @@ npm-debug.log*
 
 # Vite
 .vite/
+.project-knm/context/requirements.json

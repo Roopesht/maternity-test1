@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entity Tracker - Maternal Project (List)</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb; --accent:#2563eb;
+          --done:#16a34a; --prog:#d97706; --none:#9ca3af; --gap:#dc2626; }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:24px; background:var(--bg); color:var(--text); font:14px/1.5 system-ui,sans-serif; }
+  .wrap { max-width:1100px; margin:0 auto; }
+  h1 { font-size:20px; margin:0 0 12px; }
+  .kpis { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin-bottom:16px; }
+  .kpi { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:12px 14px; }
+  .kpi b { display:block; font-size:22px; } .kpi span { color:var(--muted); font-size:12px; }
+  .kpi.warn b { color:var(--gap); }
+  .bar { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
+  .bar input, .bar select { padding:6px 10px; border:1px solid var(--line); border-radius:6px; font:inherit; background:var(--card); color:var(--text); }
+  .bar input { flex:1; min-width:200px; }
+  .bar label { color:var(--muted); display:flex; gap:6px; align-items:center; }
+  table { width:100%; border-collapse:collapse; background:var(--card); border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+  th, td { text-align:left; padding:10px 12px; border-top:1px solid var(--line); vertical-align:middle; }
+  th { font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); background:#fafafa; border-top:0; cursor:pointer; user-select:none; }
+  th:hover { color:var(--accent); }
+  td a { color:var(--accent); text-decoration:none; font-weight:600; } td a:hover { text-decoration:underline; }
+  .desc { color:var(--muted); font-size:12px; }
+  .prog { display:flex; align-items:center; gap:8px; }
+  .track { width:90px; height:8px; background:var(--line); border-radius:4px; overflow:hidden; }
+  .fill { height:100%; background:var(--done); }
+  .badge { font-size:11px; padding:2px 8px; border-radius:10px; color:#fff; }
+  .Done { background:var(--done); } .InProgress { background:var(--prog); } .NotStarted { background:var(--none); }
+  .gap { color:var(--gap); font-size:12px; font-weight:600; }
+  .ok { color:var(--muted); font-size:12px; }
+  .story a { font-weight:400; margin-right:4px; }
+  .bp { font-style:italic; color:var(--muted); }
+  .empty { padding:24px; text-align:center; color:var(--muted); display:none; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Entities <span style="font-weight:400;color:var(--muted);font-size:13px">Maternal Project &middot; traced to requirements</span></h1>
+
+  <div class="kpis" id="kpis"></div>
+
+  <div class="bar">
+    <input id="q" type="search" placeholder="Search entity, table or URL...">
+    <select id="st"><option value="">All statuses</option><option>Done</option><option>In Progress</option><option>Not Started</option></select>
+    <select id="origin"><option value="">All origins</option><option value="blueprint">Blueprint</option><option value="req">Requirement-proposed</option></select>
+    <label><input type="checkbox" id="gaps"> Gaps only</label>
+  </div>
+
+  <table>
+    <thead><tr>
+      <th data-k="name">Entity</th>
+      <th data-k="tables">Tables</th>
+      <th data-k="statuses">Statuses</th>
+      <th data-k="pct">Processes</th>
+      <th data-k="status">Impl. status</th>
+      <th data-k="gaps">Gaps</th>
+      <th data-k="proposed">Proposed by</th>
+      <th data-k="last">Last modified by</th>
+    </tr></thead>
+    <tbody id="rows"></tbody>
+  </table>
+  <div class="empty" id="empty">No entities match the filters.</div>
+</div>
+
+<script>
+  // Document links: requirement / blueprint references (paths relative to docs/temp).
+  const DOC = {
+    "REQ-tenant-onboarding-form":            "../requirements/REQ-tenant-onboarding-form.md",
+    "REQ-certificate-upload-and-ratification":"../requirements/REQ-certificate-upload-and-ratification/qna.json"
+  };
+  const docUrl = id => DOC[id] || '#';
+  // Every entity has a detail view: entity_detail.html#<key>
+  const entityUrl = e => `tracker_entity_detail.html#${e.key}`;
+
+  // procDone / procTotal = processes Done / total; gaps = statuses + processes with no implementing work yet.
+  const E = [
+    { key:"hospital",   name:"Hospital",            desc:"Tenant hospital that signs up; holds contact and hospital details",
+      tables:["hospitals"],           statuses:2, procDone:0, procTotal:2, gaps:4, status:"Not Started", proposed:"blueprint",                  last:"-" },
+    { key:"baseline",   name:"Hospital Baseline",   desc:"Declared yearly activity counts (USG, deliveries, caesareans, NICU, MTP), locked on submit",
+      tables:["hospital_baselines"],  statuses:2, procDone:0, procTotal:3, gaps:5, status:"Not Started", proposed:"REQ-tenant-onboarding-form", last:"-" },
+    { key:"correction", name:"Baseline Correction", desc:"Audit log of Super Admin corrections to locked counts",
+      tables:["baseline_corrections"], statuses:1, procDone:0, procTotal:2, gaps:3, status:"Not Started", proposed:"REQ-tenant-onboarding-form", last:"-" },
+    { key:"alert",      name:"Baseline Alert",      desc:"In-app Super Admin alert when actual count reaches 2x, 3x... baseline",
+      tables:["baseline_alerts"],     statuses:2, procDone:0, procTotal:3, gaps:5, status:"Not Started", proposed:"REQ-tenant-onboarding-form", last:"-" }
+  ];
+  E.forEach(e => e.pct = Math.round(100 * e.procDone / e.procTotal));
+
+  const $ = id => document.getElementById(id);
+  const link = id => id === 'blueprint' ? '<span class="bp">blueprint</span>' : id === '-' ? '-' : `<a href="${docUrl(id)}">${id}</a>`;
+  let sortKey = 'name', sortDir = 1;
+
+  function render() {
+    const q = $('q').value.toLowerCase(), st = $('st').value, og = $('origin').value, go = $('gaps').checked;
+    const list = E.filter(e =>
+      (!q || [e.name, e.desc, ...e.tables].join(' ').toLowerCase().includes(q)) &&
+      (!st || e.status === st) &&
+      (!og || (og === 'blueprint') === (e.proposed === 'blueprint')) &&
+      (!go || e.gaps > 0))
+      .sort((a, b) => (a[sortKey] > b[sortKey] ? 1 : a[sortKey] < b[sortKey] ? -1 : 0) * sortDir);
+
+    $('rows').innerHTML = list.map(e => `<tr>
+      <td><a href="${entityUrl(e)}">${e.name}</a><div class="desc">${e.desc}</div></td>
+      <td>${e.tables.length}</td>
+      <td>${e.statuses}</td>
+      <td><div class="prog"><div class="track"><div class="fill" style="width:${e.pct}%"></div></div>${e.procDone}/${e.procTotal}</div></td>
+      <td><span class="badge ${e.status.replace(' ','')}">${e.status}</span></td>
+      <td>${e.gaps ? `<span class="gap">${e.gaps} missing</span>` : '<span class="ok">none</span>'}</td>
+      <td class="story">${link(e.proposed)}</td>
+      <td class="story">${link(e.last)}</td></tr>`).join('');
+    $('empty').style.display = list.length ? 'none' : 'block';
+  }
+
+  const tp = E.reduce((s, e) => s + e.procTotal, 0), dp = E.reduce((s, e) => s + e.procDone, 0);
+  $('kpis').innerHTML = `
+    <div class="kpi"><b>${E.length}</b><span>Entities</span></div>
+    <div class="kpi"><b>${Math.round(100 * dp / tp)}%</b><span>Processes done (${dp}/${tp})</span></div>
+    <div class="kpi"><b>${E.filter(e => e.status === 'In Progress').length}</b><span>In progress</span></div>
+    <div class="kpi warn"><b>${E.reduce((s, e) => s + e.gaps, 0)}</b><span>Gaps (not yet implemented)</span></div>`;
+
+  ['q','st','origin','gaps'].forEach(id => $(id).addEventListener('input', render));
+  document.querySelectorAll('th').forEach(th => th.addEventListener('click', () => {
+    sortDir = sortKey === th.dataset.k ? -sortDir : 1; sortKey = th.dataset.k; render();
+  }));
+  render();
+</script>
+</body>
+</html>

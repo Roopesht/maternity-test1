@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Entity Tracker - Maternal Project (Detail)</title>
+<style>
+  :root { --bg:#f6f7f9; --card:#fff; --text:#1f2937; --muted:#6b7280; --line:#e5e7eb; --accent:#2563eb;
+          --done:#16a34a; --prog:#d97706; --none:#9ca3af; }
+  * { box-sizing: border-box; }
+  body { margin:0; padding:24px; background:var(--bg); color:var(--text); font:14px/1.5 system-ui,sans-serif; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:8px; padding:16px 20px; max-width:760px; margin:0 auto 16px; }
+  h1 { font-size:20px; margin:0; display:flex; align-items:center; gap:8px; }
+  h2 { font-size:12px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin:0 0 10px; }
+  .sub { color:var(--muted); margin:4px 0 0; }
+  .meta { margin:12px 0 0; padding-top:8px; border-top:1px solid var(--line); }
+  .meta summary { cursor:pointer; font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
+  .meta dl { margin:0; }
+  .meta dt { font-size:11px; color:var(--muted); text-transform:uppercase; margin-top:8px; }
+  .meta dd { margin:2px 0 0; }
+  .meta code { background:var(--bg); border:1px solid var(--line); border-radius:4px; padding:1px 6px; margin-right:4px; font-size:12px; }
+  .meta a { color:var(--accent); text-decoration:none; margin-right:10px; } .meta a:hover { text-decoration:underline; }
+  ul { list-style:none; margin:0; padding:0; }
+  li { display:flex; align-items:center; gap:8px; padding:8px 0; border-top:1px solid var(--line); }
+  li:first-child { border-top:0; }
+  .name { flex:1; }
+  .badge { font-size:11px; padding:2px 8px; border-radius:10px; color:#fff; }
+  .Done { background:var(--done); } .InProgress { background:var(--prog); } .NotStarted { background:var(--none); }
+  .info { border:1px solid var(--line); background:#fff; color:var(--accent); width:22px; height:22px; border-radius:50%;
+          font:italic 700 13px Georgia,serif; cursor:pointer; padding:0; }
+  .info:hover, .info:focus-visible { background:var(--accent); color:#fff; outline:none; }
+  #pop { position:absolute; display:none; z-index:10; width:280px; background:var(--card); border:1px solid var(--line);
+         border-radius:8px; box-shadow:0 8px 24px rgba(0,0,0,.15); padding:12px 14px; }
+  #pop h3 { margin:0 0 8px; font-size:13px; }
+  #pop dl { margin:0; } #pop dt { font-size:11px; color:var(--muted); text-transform:uppercase; margin-top:8px; }
+  #pop dd { margin:2px 0 0; }
+  #pop a { color:var(--accent); text-decoration:none; margin-right:6px; } #pop a:hover { text-decoration:underline; }
+  a[href="#"] { cursor:default; }
+  .bp { font-style:italic; color:var(--muted); }
+  .x { position:absolute; top:6px; right:8px; border:0; background:none; cursor:pointer; color:var(--muted); font-size:16px; }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <p class="sub" style="margin:0 0 8px"><a href="tracker_entity_list.html" style="color:var(--accent);text-decoration:none">&larr; All entities</a></p>
+  <h1><span id="ename"></span> <button class="info" id="einfo" aria-label="Info: entity">i</button>
+      <span class="badge" id="ebadge"></span></h1>
+  <p class="sub">Entity tracker view. Click the <b>i</b> icon for requirement history.</p>
+  <details class="meta" open>
+  <summary>Entity details</summary>
+  <dl>
+    <dt>Description</dt><dd id="edesc"></dd>
+    <dt>Tables</dt><dd id="etables"></dd>
+    <dt>App URLs</dt><dd id="eurls"></dd>
+    <dt>Related entities</dt><dd id="erel"></dd>
+  </dl>
+  </details>
+</div>
+
+<div class="card">
+  <h2>Statuses</h2>
+  <ul id="statuses"></ul>
+</div>
+
+<div class="card">
+  <h2>Processes</h2>
+  <ul id="processes"></ul>
+</div>
+
+<div id="pop" role="dialog" aria-live="polite"></div>
+
+<script>
+  // Document links: requirement / blueprint references (paths relative to docs/temp).
+  const DOC = {
+    "REQ-tenant-onboarding-form":            "../requirements/REQ-tenant-onboarding-form.md",
+    "REQ-certificate-upload-and-ratification":"../requirements/REQ-certificate-upload-and-ratification/qna.json"
+  };
+  const docUrl = id => DOC[id] || '#';
+
+  // history: proposed / implemented / modified. Items are requirement ids or 'blueprint'.
+  // Nothing is implemented yet: no code for these requirements has landed.
+  const REQ = "REQ-tenant-onboarding-form", CERT = "REQ-certificate-upload-and-ratification";
+  const h = (proposed, implemented = [], modified = []) => ({ proposed, implemented, modified });
+
+  const ENT = {
+    hospital: { name:"Hospital", status:"Not Started", desc:"A tenant hospital. The person signing up becomes Hospital Admin and supplies contact and hospital details at first sign-up.",
+      tables:["hospitals"], urls:["/onboarding","/hospitals/:id"], related:["baseline","alert"],
+      hist:h(["blueprint"]),
+      statuses:[["Submitted","Not Started",h([REQ])],["Ratified","Not Started",h([CERT])]],
+      processes:[["Onboarding sign-up","Not Started",h([REQ])],["View hospital profile","Not Started",h([REQ])]] },
+    baseline: { name:"Hospital Baseline", status:"Not Started", desc:"The hospital's self-declared activity counts and period (min 12 months). Yearly baseline = count / months x 12. Counts are locked after submission.",
+      tables:["hospital_baselines"], urls:["/onboarding","/hospitals/:id"], related:["hospital","correction","alert"],
+      hist:h([REQ]),
+      statuses:[["Locked","Not Started",h([REQ])],["Corrected","Not Started",h([REQ])]],
+      processes:[["Submit and lock counts","Not Started",h([REQ])],["Super Admin correction","Not Started",h([REQ])],["Yearly baseline calculation","Not Started",h([REQ])]] },
+    correction: { name:"Baseline Correction", status:"Not Started", desc:"Permanent audit record of each Super Admin change to a locked count: field, old value, new value, who, when.",
+      tables:["baseline_corrections"], urls:["/admin/hospitals/:id/baseline"], related:["baseline","hospital"],
+      hist:h([REQ]),
+      statuses:[["Logged","Not Started",h([REQ])]],
+      processes:[["Record correction","Not Started",h([REQ])],["View correction history","Not Started",h([REQ])]] },
+    alert: { name:"Baseline Alert", status:"Not Started", desc:"In-app alert to the Super Admin when a count's last-12-month actual first reaches 2x, 3x, 4x... its baseline. Each multiple fires once per count per hospital.",
+      tables:["baseline_alerts"], urls:["/admin/alerts"], related:["baseline","hospital"],
+      hist:h([REQ]),
+      statuses:[["Unread","Not Started",h([REQ])],["Read","Not Started",h([REQ])]],
+      processes:[["Monthly baseline check","Not Started",h([REQ])],["Run check on demand","Not Started",h([REQ])],["Mark alert read","Not Started",h([REQ])]] }
+  };
+
+  const key = (location.hash || '#hospital').slice(1);
+  const ent = ENT[key] || ENT.hospital;
+  const cls = s => s.replace(' ','');
+  const data = {};
+
+  document.title = 'Entity Tracker - ' + ent.name;
+  document.getElementById('ename').textContent = ent.name;
+  const eb = document.getElementById('ebadge'); eb.textContent = ent.status; eb.className = 'badge ' + cls(ent.status);
+  document.getElementById('edesc').textContent = ent.desc;
+  document.getElementById('etables').innerHTML = ent.tables.map(t => `<code>${t}</code>`).join(' ');
+  document.getElementById('eurls').innerHTML = ent.urls.map(u => `<a href="#" onclick="return false">${u}</a>`).join(' ');
+  document.getElementById('erel').innerHTML = ent.related.map(k => `<a href="#${k}">${ENT[k].name}</a>`).join(' ');
+  document.getElementById('einfo').dataset.key = 'entity:' + ent.name;
+  data['entity:' + ent.name] = { title:'Entity: ' + ent.name, ...ent.hist };
+  window.addEventListener('hashchange', () => location.reload());
+
+  const row = (kind, [name, st, hist]) => {
+    data[kind + ':' + name] = { title: (kind === 'status' ? 'Status: ' : 'Process: ') + name, ...hist };
+    return `<li><span class="name">${name}</span>
+      <span class="badge ${cls(st)}">${st}</span>
+      <button class="info" data-key="${kind}:${name}" aria-label="Info: ${name}">i</button></li>`;
+  };
+  document.getElementById('statuses').innerHTML  = ent.statuses.map(s => row('status', s)).join('');
+  document.getElementById('processes').innerHTML = ent.processes.map(p => row('process', p)).join('');
+
+  const pop = document.getElementById('pop');
+  const links = ids => !ids.length ? '<span class="bp">none yet</span>'
+    : ids.map(id => id === 'blueprint' ? '<span class="bp">blueprint</span>' : `<a href="${docUrl(id)}">${id}</a>`).join(' ');
+
+  function show(btn) {
+    const d = data[btn.dataset.key];
+    pop.innerHTML = `<button class="x" aria-label="Close">&times;</button><h3>${d.title}</h3>
+      <dl><dt>Proposed</dt><dd>${links(d.proposed)}</dd>
+          <dt>Implemented</dt><dd>${links(d.implemented)}</dd>
+          <dt>Modified</dt><dd>${links(d.modified)}</dd></dl>`;
+    pop.style.display = 'block';
+    const r = btn.getBoundingClientRect();
+    pop.style.top  = (window.scrollY + r.bottom + 6) + 'px';
+    pop.style.left = Math.min(window.scrollX + r.left, window.innerWidth - 300) + 'px';
+  }
+
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('.info');
+    if (btn) { e.stopPropagation(); show(btn); return; }
+    if (e.target.closest('.x') || !e.target.closest('#pop')) pop.style.display = 'none';
+  });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') pop.style.display = 'none'; });
+</script>
+</body>
+</html>
